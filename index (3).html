@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seu Plano Odontológico: Compare e Decida</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .table-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #0d9488;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 py-10">
+
+     <div class="max-w-4xl w-full bg-white rounded-xl shadow-2xl overflow-hidden mx-auto ">
+        
+        <div class="grid grid-cols-2 gap-0 p-1 bg-blue-500 rounded-lg border">
+            <img src="https://www.aeronautas.org.br/wp-content/themes/sna_tema-sna/assets/imgs/logo.png"
+	class="block mx-auto h-24 w-auto flex items-center " >
+
+	<img src="https://i.ibb.co/DgfW63kz/5.png"
+	class="block mx-auto h-24 w-auto flex items-center " >
+        </div>
+
+        <div class="p-8 md:p-10">
+            <header class="text-center mb-6">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-700 ">
+                    Seu Plano Odontológico, Sua Escolha.
+                </h1>
+                <p class="text-lg text-gray-700 mt-3">
+                    Este é o momento ideal para reavaliar seus benefícios.
+                </p>
+            </header>
+            
+            <div class="text-center mb-8">
+                <p class="text-gray-700 text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
+                    Conheça os novos valores e planos odontológicos, com reajuste de <strong>6,97%</strong> a partir de <strong>setembro/2025</strong>. Oferecemos a flexibilidade que você precisa. Use as ferramentas abaixo para tomar a melhor decisão para você e sua família.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                <div class="bg-teal-50 border border-teal-200 p-6 rounded-lg text-center">
+                    <h3 class="font-bold text-xl text-teal-700 mb-2">Planos Essenciais</h3>
+                    <p class="text-teal-900">Ideal para consultas de rotina, limpezas e procedimentos mais simples, garantindo sua saúde bucal em dia.</p>
+                </div>
+                <div class="bg-orange-50 border border-orange-200 p-6 rounded-lg text-center">
+                    <h3 class="font-bold text-xl text-orange-700 mb-2">Planos Abrangentes</h3>
+                    <p class="text-orange-900">Cobertura completa para tratamentos ortodônticos, clareamento, próteses e procedimentos complexos.</p>
+                </div>
+            </div>
+            
+            <!-- Step 1: Cost Simulator -->
+            <div id="cost-simulator" class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 text-center mb-1">Passo 1: Simule Seu Custo Mensal</h2>
+                <p class="text-center text-gray-600 mb-6">Insira o número de pessoas para visualizar o custo total por plano.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="current-plan" class="block text-sm font-medium text-gray-700">Seu plano atual (ou de interesse)</label>
+                        <select id="current-plan" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
+                            <!-- Options will be populated by JS -->
+                        </select>
+                    </div>
+                    <div>
+                        <label for="life-count" class="block text-sm font-medium text-gray-700">Nº de pessoas no plano (você + dep.)</label>
+                        <input type="number" id="life-count" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="Ex: 3" value="1">
+                    </div>
+                </div>
+                
+                <button id="calculate-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-500 transition-colors flex items-center justify-center">
+                    Calcular Custo Mensal
+                </button>
+
+                <div id="simulation-results" class="mt-6 hidden"></div>
+            </div>
+
+            <!-- Step 2: ✨ Gemini API Feature Section -->
+            <div id="gemini-analyzer" class="bg-green-50 p-6 rounded-lg border border-green-200 mt-8">
+                <h2 class="text-2xl font-bold text-gray-800 text-center mb-1">Passo 2: Peça uma Análise da IA</h2>
+                <p class="text-center text-gray-600 mb-6">Ainda na dúvida? Descreva suas necessidades e nossa IA te ajudará a encontrar o plano ideal.</p>
+                
+                <div class="mb-4">
+                    <label for="user-needs" class="block text-sm font-medium text-gray-700 mb-1">Descreva sua situação e necessidades de cobertura odontológica:</label>
+                    <textarea id="user-needs" rows="4" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="Ex: Tenho 2 filhos, um pode precisar de aparelho. Eu gostaria de fazer clareamento e meu cônjuge talvez precise de uma prótese..."></textarea>
+                </div>
+                
+                <button id="analyze-button" class="w-full bg-teal-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-teal-700 transition-colors flex items-center justify-center">
+                    Analisar Meu Perfil
+                </button>
+
+                <div id="result-area" class="mt-6 hidden">
+                    <div id="loading-spinner" class="flex justify-center items-center">
+                        <div class="spinner"></div>
+                        <p class="ml-3 text-gray-600">Analisando... Por favor, aguarde.</p>
+                    </div>
+                    <div id="recommendation" class="bg-white p-4 rounded-md border"></div>
+                </div>
+                 <div id="error-message" class="hidden mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" role="alert">
+                    <strong class="font-bold">Oops!</strong>
+                    <span class="block sm:inline">Ocorreu um erro ao buscar a recomendação. Por favor, tente novamente mais tarde.</span>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 text-white p-6 rounded-lg text-center shadow-md mt-10">
+                <h2 class="text-xl font-bold mb-1">Ficou com dúvidas ou decidiu mudar?</h2>
+                <p class="text-gray-100">Fale com o RH para validar os detalhes e efetivar a sua escolha.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coverage Modal -->
+    <div id="coverage-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-plan-name" class="text-2xl font-bold text-gray-800">Detalhes da Cobertura</h3>
+                <button id="close-modal-btn" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+            </div>
+            <div id="modal-plan-coverage" class="text-gray-700 space-y-2">
+                <!-- Coverage details will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+
+<script type="module">
+    // --- PLAN DATA (PRICES & COVERAGE) ---
+    const dentalPlanData = {
+        "MAIS PME MAIS": {
+            price: 24.50,
+            coverage: [
+                "Urgência e Emergência 24h",
+                "Consultas e Diagnóstico",
+                "Prevenção (Limpeza, Flúor)",
+                "Restaurações (em resina e amálgama)",
+                "Tratamento de Canal (Endodontia)",
+                "Tratamento de Gengiva (Periodontia)",
+                "Cirurgias e extrações (incluindo dente do siso)",
+                "Odontopediatria (tratamento para crianças)",
+                "Radiologia (raios-x panorâmicos e periapicais)",
+                "Próteses simples (coroas provisórias e núcleos)"
+            ]
+        },
+        "MAIS DOC PME MAIS": {
+            price: 26.64,
+            coverage: [
+                "<strong>Toda a cobertura do plano 'MAIS PME MAIS'</strong>",
+                "Documentação Ortodôntica completa",
+                "Telerradiografia com traçado cefalométrico",
+                "Modelos ortodônticos"
+            ]
+        },
+        "MAIS CLAREAR PME MAIS": {
+            price: 41.61,
+            coverage: [
+                "<strong>Toda a cobertura do plano 'MAIS PME MAIS'</strong>",
+                "Clareamento dental caseiro (gel e moldeira)",
+                "Placa de bruxismo (placa miorrelaxante)"
+            ]
+        },
+        "MAIS ORTO PME MAIS": {
+            price: 66.21,
+            coverage: [
+                "<strong>Toda a cobertura do plano 'MAIS DOC PME MAIS'</strong>",
+                "Instalação de Aparelho Fixo Metálico",
+                "Manutenção mensal do aparelho ortodôntico",
+                "Aparelhos ortopédicos (ex: Klammt, Herbst)"
+            ]
+        },
+        "MAIS PRO PME MAIS": {
+            price: 73.70,
+            coverage: [
+                "<strong>Toda a cobertura do plano 'MAIS PME MAIS'</strong>",
+                "Próteses em resina, cerâmica e porcelana (coroas)",
+                "Prótese Parcial Removível (PPR - 'ponte móvel')",
+                "Placa de bruxismo (placa miorrelaxante)"
+            ]
+        },
+        "MAIS AMPLO PME MAIS": {
+            price: 92.96,
+            coverage: [
+                "<strong>Combinação das coberturas dos planos MAIS ORTO, MAIS PRO e MAIS CLAREAR</strong>",
+                "Ortodontia completa (instalação e manutenção)",
+                "Próteses complexas (coroas em cerâmica pura, PPR com encaixe)",
+                "Clareamento dental caseiro",
+                "Placa de bruxismo"
+            ]
+        },
+        "PREMIUM PME MAIS": {
+            price: 277.02,
+            coverage: [
+                "<strong>Toda a cobertura do plano 'MAIS AMPLO PME MAIS'</strong>",
+                "Implantes dentários (cirurgia e prótese sobre implante)",
+                "Protocolo Branemark (prótese total sobre implantes)",
+                "Aparelho Fixo Estético",
+                "Clareamento a laser em consultório",
+                "Tomografia computadorizada"
+            ]
+        }
+    };
+
+    // --- DOM ELEMENTS ---
+    const lifeCountInput = document.getElementById('life-count');
+    const calculateBtn = document.getElementById('calculate-btn');
+    const simulationResultsDiv = document.getElementById('simulation-results');
+    const currentPlanSelect = document.getElementById('current-plan');
+    const analyzeButton = document.getElementById('analyze-button');
+    const userNeedsInput = document.getElementById('user-needs');
+    const resultArea = document.getElementById('result-area');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const recommendationDiv = document.getElementById('recommendation');
+    const errorMessageDiv = document.getElementById('error-message');
+    const modal = document.getElementById('coverage-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const modalPlanName = document.getElementById('modal-plan-name');
+    const modalPlanCoverage = document.getElementById('modal-plan-coverage');
+
+    // --- INITIALIZATION ---
+    function populatePlanOptions() {
+        const planNames = Object.keys(dentalPlanData);
+        planNames.forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            currentPlanSelect.appendChild(option);
+        });
+    }
+    document.addEventListener('DOMContentLoaded', populatePlanOptions);
+
+    // --- EVENT LISTENERS ---
+    calculateBtn.addEventListener('click', calculateAndDisplayCosts);
+    analyzeButton.addEventListener('click', getRecommendation);
+    closeModalBtn.addEventListener('click', () => modal.classList.remove('visible'));
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('visible');
+        }
+    });
+    simulationResultsDiv.addEventListener('click', (e) => {
+        if (e.target.matches('.view-coverage-btn')) {
+            const planName = e.target.dataset.plan;
+            openCoverageModal(planName);
+        }
+    });
+
+    // --- FUNCTIONS ---
+    function formatCurrency(value) {
+        return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+    
+    function showInputError(inputElement, message) {
+        inputElement.classList.add('border-red-500', 'ring-red-500');
+        const originalPlaceholder = inputElement.placeholder;
+        inputElement.value = '';
+        inputElement.placeholder = message;
+        setTimeout(() => {
+           inputElement.classList.remove('border-red-500', 'ring-red-500');
+           inputElement.placeholder = originalPlaceholder;
+        }, 3000);
+    }
+
+    function calculateAndDisplayCosts() {
+        const lifeCount = parseInt(lifeCountInput.value, 10) || 0;
+        if (lifeCount <= 0) {
+            showInputError(lifeCountInput, 'Nº de vidas inválido!');
+            return;
+        }
+
+        const selectedPlan = currentPlanSelect.value;
+        let tableRows = '';
+
+        for (const planName in dentalPlanData) {
+            const plan = dentalPlanData[planName];
+            const totalCost = plan.price * lifeCount;
+            const isSelected = planName === selectedPlan;
+            
+            tableRows += `
+                <tr class="${isSelected ? 'bg-teal-50' : ''}">
+                    <td class="p-3 border-b border-gray-200 ${isSelected ? 'font-bold' : ''}">${planName}</td>
+                    <td class="p-3 border-b border-gray-200 text-center">${formatCurrency(plan.price)}</td>
+                    <td class="p-3 border-b border-gray-200 text-center font-semibold text-teal-700">${formatCurrency(totalCost)}</td>
+                    <td class="p-3 border-b border-gray-200 text-center">
+                        <button class="view-coverage-btn text-sm text-blue-600 hover:underline font-semibold" data-plan="${planName}">Ver Cobertura</button>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        const resultHTML = `
+            <h3 class="text-xl font-bold text-gray-800 text-center mb-4">Resultado da Simulação (${lifeCount} pessoa${lifeCount > 1 ? 's' : ''})</h3>
+            <div class="overflow-x-auto table-fade-in">
+                <table class="w-full text-sm text-left text-gray-700 bg-white rounded-lg shadow">
+                    <thead class="bg-gray-200 text-xs uppercase">
+                        <tr>
+                            <th class="p-3">Plano Odontológico</th>
+                            <th class="p-3 text-center">Valor Mensal (por pessoa)</th>
+                            <th class="p-3 text-center">Seu Custo Total Mensal</th>
+                            <th class="p-3 text-center">Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-xs text-center text-gray-500 mt-2">* A linha destacada representa seu plano atual (ou de interesse) para facilitar a comparação.</p>`;
+        
+        simulationResultsDiv.innerHTML = resultHTML;
+        simulationResultsDiv.classList.remove('hidden');
+    }
+    
+    function openCoverageModal(planName) {
+        const plan = dentalPlanData[planName];
+        if (!plan) return;
+
+        modalPlanName.textContent = planName;
+        
+        const coverageHTML = plan.coverage.map(item => `
+            <li class="flex items-start">
+                <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                <span>${item}</span>
+            </li>
+        `).join('');
+
+        modalPlanCoverage.innerHTML = `<ul class="space-y-2">${coverageHTML}</ul>`;
+        modal.classList.add('visible');
+    }
+
+    async function getRecommendation() {
+        const userNeeds = userNeedsInput.value;
+        if (!userNeeds.trim()) {
+            showInputError(userNeedsInput, 'Por favor, descreva suas necessidades.');
+            return;
+        }
+
+        resultArea.classList.remove('hidden');
+        loadingSpinner.style.display = 'flex';
+        recommendationDiv.classList.add('hidden');
+        errorMessageDiv.classList.add('hidden');
+        analyzeButton.disabled = true;
+        analyzeButton.textContent = 'Analisando...';
+
+        const planList = Object.keys(dentalPlanData).join(', ');
+
+        const prompt = `
+            Você é um especialista em benefícios de RH de uma empresa no Brasil, com um tom empático e prestativo.
+            Um colaborador está analisando as novas opções de plano odontológico.
+
+            Com base na situação do colaborador descrita abaixo, recomende um dos seguintes planos: ${planList}.
+
+            Sua resposta deve ter o seguinte formato:
+            1.  **Plano Recomendado:** O nome do plano em negrito (ex: **MAIS ORTO PME MAIS**).
+            2.  **Justificativa:** Um parágrafo explicando o porquê da sua recomendação de forma simples, direta e humana, conectando com as necessidades que o colaborador descreveu (ex: se ele mencionou filhos e aparelho, foque no plano com ortodontia).
+            3.  **Próximo Passo:** Uma frase curta sugerindo que ele procure o RH para validar os detalhes da cobertura e efetivar a escolha.
+
+            Situação do colaborador: "${userNeeds}"
+        `;
+
+        try {
+            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`API call failed with status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            let recommendationText = 'Não foi possível obter uma recomendação.';
+            if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                recommendationText = result.candidates[0].content.parts[0].text;
+            }
+
+            recommendationDiv.innerHTML = recommendationText
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+
+            loadingSpinner.style.display = 'none';
+            recommendationDiv.classList.remove('hidden');
+
+        } catch (error) {
+            console.error('Error fetching recommendation:', error);
+            loadingSpinner.style.display = 'none';
+            errorMessageDiv.classList.remove('hidden');
+        } finally {
+            analyzeButton.disabled = false;
+            analyzeButton.textContent = 'Analisar Meu Perfil';
+        }
+    }
+</script>
+
+</body>
+</html>
+
