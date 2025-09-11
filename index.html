@@ -19,6 +19,18 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #0d9488;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         /* Modal Styles */
         .modal-overlay {
             position: fixed;
@@ -59,12 +71,15 @@
 
     <div class="max-w-4xl w-full bg-white rounded-xl shadow-2xl overflow-hidden mx-auto ">
         
+    <div class="max-w-4xl w-full bg-white rounded-xl shadow-2xl overflow-hidden mx-auto ">
+        
         <div class="grid grid-cols-2 gap-0 p-1 bg-blue-500 rounded-lg border">
             <img src="https://www.aeronautas.org.br/wp-content/themes/sna_tema-sna/assets/imgs/logo.png"
                 class="block mx-auto h-24 w-auto flex items-center " >
 
             <img src="https://i.ibb.co/DgfW63kz/5.png"
                 class="block mx-auto h-24 w-auto flex items-center " >
+        </div>
         </div>
 
         <div class="p-8 md:p-10">
@@ -118,8 +133,8 @@
             </div>
             
             <div id="cost-simulator" class="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                <h2 class="text-2xl font-bold text-gray-800 text-center mb-1">Passo 1: Simule Seu Custo Mensal</h2>
-                <p class="text-center text-gray-600 mb-6">Insira o número de pessoas para visualizar o custo total por plano.</p>
+                <h2 class="text-2xl font-bold text-gray-800 text-center mb-1">Simule Seu Custo Mensal</h2>
+                <p class="text-center text-gray-600 mb-6">Insira o número de dependentes para visualizar o custo total por plano.</p>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
@@ -128,8 +143,8 @@
                             </select>
                     </div>
                     <div>
-                        <label for="life-count" class="block text-sm font-medium text-gray-700">Nº de pessoas no plano (você + dep.)</label>
-                        <input type="number" id="life-count" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="Ex: 3" value="1">
+                        <label for="dependents-count" class="block text-sm font-medium text-gray-700">Nº de dependentes</label>
+                        <input type="number" id="dependents-count" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="Ex: 2" value="0">
                     </div>
                 </div>
                 
@@ -140,6 +155,7 @@
                 <div id="simulation-results" class="mt-6 hidden"></div>
             </div>
 
+             <!-- Step 2: ✨ Gemini API Feature Section -->
             <div class="bg-gray-800 text-white p-6 rounded-lg text-center shadow-md mt-10">
                 <h2 class="text-xl font-bold mb-1">Ficou com dúvidas ou decidiu mudar?</h2>
                 <p class="text-gray-100">Fale com o RH para validar os detalhes e efetivar a sua escolha.</p>
@@ -147,6 +163,7 @@
         </div>
     </div>
 
+    <!-- Coverage Modal -->
     <div id="coverage-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-4">
@@ -154,89 +171,80 @@
                 <button id="close-modal-btn" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
             </div>
             <div id="modal-plan-coverage" class="text-gray-700 space-y-2">
-                </div>
+                <!-- Coverage details will be inserted here -->
+            </div>
         </div>
     </div>
 
 
 <script type="module">
     // --- PLAN DATA (PRICES & COVERAGE) ---
+    // Prices based on the provided PDF for "Colaboradores" and "Dependentes"
     const dentalPlanData = {
-        "MAIS PME MAIS": {
-            price: 24.50,
+        "Mais": {
+            priceHolder: 2.45,
+            priceDependent: 24.50,
             coverage: [
-                "Urgência e Emergência 24h",
-                "Consultas e Diagnóstico",
-                "Prevenção (Limpeza, Flúor)",
-                "Restaurações (em resina e amálgama)",
-                "Tratamento de Canal (Endodontia)",
-                "Tratamento de Gengiva (Periodontia)",
-                "Cirurgias e extrações (incluindo dente do siso)",
-                "Odontopediatria (tratamento para crianças)",
-                "Radiologia (raios-x panorâmicos e periapicais)",
-                "Próteses simples (coroas provisórias e núcleos)"
+                "Urgência e Emergência 24h", "Consultas e Diagnóstico", "Prevenção (Limpeza, Flúor)",
+                "Restaurações (em resina e amálgama)", "Tratamento de Canal (Endodontia)", "Tratamento de Gengiva (Periodontia)",
+                "Cirurgias e extrações (incluindo dente do siso)", "Odontopediatria (tratamento para crianças)",
+                "Radiologia (raios-x panorâmicos e periapicais)", "Próteses simples (coroas provisórias e núcleos)"
             ]
         },
-        "MAIS DOC PME MAIS": {
-            price: 26.64,
+        "Mais Doc": {
+            priceHolder: 4.59,
+            priceDependent: 26.64,
             coverage: [
-                "<strong>Toda a cobertura do plano 'MAIS PME MAIS'</strong>",
-                "Documentação Ortodôntica completa",
-                "Telerradiografia com traçado cefalométrico",
-                "Modelos ortodônticos"
+                "<strong>Toda a cobertura do plano 'Mais'</strong>", "Documentação Ortodôntica completa",
+                "Telerradiografia com traçado cefalométrico", "Modelos ortodônticos"
             ]
         },
-        "MAIS CLAREAR PME MAIS": {
-            price: 41.61,
+        "Mais Clarear": {
+            priceHolder: 19.56,
+            priceDependent: 41.61,
             coverage: [
-                "<strong>Toda a cobertura do plano 'MAIS PME MAIS'</strong>",
-                "Clareamento dental caseiro (gel e moldeira)",
+                "<strong>Toda a cobertura do plano 'Mais'</strong>", "Clareamento dental caseiro (gel e moldeira)",
                 "Placa de bruxismo (placa miorrelaxante)"
             ]
         },
-        "MAIS ORTO PME MAIS": {
-            price: 66.21,
+        "Mais Orto": {
+            priceHolder: 44.16,
+            priceDependent: 66.21,
             coverage: [
-                "<strong>Toda a cobertura do plano 'MAIS DOC PME MAIS'</strong>",
-                "Instalação de Aparelho Fixo Metálico",
-                "Manutenção mensal do aparelho ortodôntico",
-                "Aparelhos ortopédicos (ex: Klammt, Herbst)"
+                "<strong>Toda a cobertura do plano 'Mais Doc'</strong>", "Instalação de Aparelho Fixo Metálico",
+                "Manutenção mensal do aparelho ortodôntico", "Aparelhos ortopédicos (ex: Klammt, Herbst)"
             ]
         },
-        "MAIS PRO PME MAIS": {
-            price: 73.70,
+        "Mais Pro": {
+            priceHolder: 51.65,
+            priceDependent: 73.70,
             coverage: [
-                "<strong>Toda a cobertura do plano 'MAIS PME MAIS'</strong>",
-                "Próteses em resina, cerâmica e porcelana (coroas)",
-                "Prótese Parcial Removível (PPR - 'ponte móvel')",
-                "Placa de bruxismo (placa miorrelaxante)"
+                "<strong>Toda a cobertura do plano 'Mais'</strong>", "Próteses em resina, cerâmica e porcelana (coroas)",
+                "Prótese Parcial Removível (PPR - 'ponte móvel')", "Placa de bruxismo (placa miorrelaxante)"
             ]
         },
-        "MAIS AMPLO PME MAIS": {
-            price: 92.96,
+        "Mais Amplo": {
+            priceHolder: 70.91,
+            priceDependent: 92.96,
             coverage: [
-                "<strong>Combinação das coberturas dos planos MAIS ORTO, MAIS PRO e MAIS CLAREAR</strong>",
-                "Ortodontia completa (instalação e manutenção)",
-                "Próteses complexas (coroas em cerâmica pura, PPR com encaixe)",
-                "Clareamento dental caseiro",
-                "Placa de bruxismo"
+                "<strong>Combinação das coberturas dos planos Mais Orto, Mais Pro e Mais Clarear</strong>",
+                "Ortodontia completa (instalação e manutenção)", "Próteses complexas (coroas em cerâmica pura, PPR com encaixe)",
+                "Clareamento dental caseiro", "Placa de bruxismo"
             ]
         },
-        "PREMIUM PME MAIS": {
-            price: 277.02,
+        "Premium": {
+            priceHolder: 254.97,
+            priceDependent: 277.02,
             coverage: [
-                "<strong>Toda a cobertura do plano 'MAIS AMPLO PME MAIS'</strong>",
-                "Implantes dentários (cirurgia e prótese sobre implante)",
-                "Protocolo Branemark (prótese total sobre implantes)",
-                "Aparelho Fixo Estético",
-                "Clareamento a laser em consultório",
-                "Tomografia computadorizada"
+                "<strong>Toda a cobertura do plano 'Mais Amplo'</strong>", "Implantes dentários (cirurgia e prótese sobre implante)",
+                "Protocolo Branemark (prótese total sobre implantes)", "Aparelho Fixo Estético",
+                "Clareamento a laser em consultório", "Tomografia computadorizada"
             ]
         }
     };
 
     // --- DOM ELEMENTS ---
-    const lifeCountInput = document.getElementById('life-count');
+    const dependentsCountInput = document.getElementById('dependents-count');
     const calculateBtn = document.getElementById('calculate-btn');
     const simulationResultsDiv = document.getElementById('simulation-results');
     const currentPlanSelect = document.getElementById('current-plan');
@@ -289,24 +297,34 @@
     }
 
     function calculateAndDisplayCosts() {
-        const lifeCount = parseInt(lifeCountInput.value, 10) || 0;
-        if (lifeCount <= 0) {
-            showInputError(lifeCountInput, 'Nº de vidas inválido!');
+        const dependentsCount = parseInt(dependentsCountInput.value, 10);
+        if (isNaN(dependentsCount) || dependentsCount < 0) {
+            showInputError(dependentsCountInput, 'Nº de dependentes inválido!');
             return;
         }
 
+        const lifeCount = dependentsCount + 1; // Employee + dependents
         const selectedPlan = currentPlanSelect.value;
         let tableRows = '';
 
         for (const planName in dentalPlanData) {
             const plan = dentalPlanData[planName];
-            const totalCost = plan.price * lifeCount;
+            
+            const titularCost = plan.priceHolder;
+            const dependentsTotalCost = plan.priceDependent * dependentsCount;
+            const totalCost = titularCost + dependentsTotalCost;
+
             const isSelected = planName === selectedPlan;
             
+            let costDetail = `Titular: ${formatCurrency(titularCost)}`;
+            if (dependentsCount > 0) {
+                costDetail += ` + ${dependentsCount} dep. (${formatCurrency(plan.priceDependent)}/cada)`;
+            }
+
             tableRows += `
                 <tr class="${isSelected ? 'bg-teal-50' : ''}">
                     <td class="p-3 border-b border-gray-200 ${isSelected ? 'font-bold' : ''}">${planName}</td>
-                    <td class="p-3 border-b border-gray-200 text-center">${formatCurrency(plan.price)}</td>
+                    <td class="p-3 border-b border-gray-200 text-sm">${costDetail}</td>
                     <td class="p-3 border-b border-gray-200 text-center font-semibold text-teal-700">${formatCurrency(totalCost)}</td>
                     <td class="p-3 border-b border-gray-200 text-center">
                         <button class="view-coverage-btn text-sm text-blue-600 hover:underline font-semibold" data-plan="${planName}">Ver Cobertura</button>
@@ -322,9 +340,9 @@
                     <thead class="bg-gray-200 text-xs uppercase">
                         <tr>
                             <th class="p-3">Plano Odontológico</th>
-                            <th class="p-3 text-center">Valor Mensal (por pessoa)</th>
+                            <th class="p-3">Detalhamento do Custo</th>
                             <th class="p-3 text-center">Seu Custo Total Mensal</th>
-                            <th class="p-3 text-center">Detalhes</th>
+                            <th class="p-3 text-center">Cobertura</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -332,7 +350,7 @@
                     </tbody>
                 </table>
             </div>
-            <p class="text-xs text-center text-gray-500 mt-2">* A linha destacada representa seu plano atual (ou de interesse) para facilitar a comparação.</p>`;
+            <p class="text-xs text-center text-gray-500 mt-2">* A linha destacada representa seu plano de interesse. O valor do titular já está com o subsídio aplicado.</p>`;
         
         simulationResultsDiv.innerHTML = resultHTML;
         simulationResultsDiv.classList.remove('hidden');
@@ -358,3 +376,4 @@
 
 </body>
 </html>
+
